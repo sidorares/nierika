@@ -28,6 +28,9 @@ before_install:
 script:
   - docker run -d --name vnc -p 5911:5901 -e "VNC_PW=my-new-password" consol/centos-xfce-vnc
   # - docker run --link vnc:vnc -e CHECK_PORT=5911 -e CHECK_HOST=vnc giorgos/takis
+  - wget https://github.com/glogiotatidis/takis/raw/master/bin/takis
+  - chmod +x takis
+  - CHECK_PORT=5911 ./takis
   - node --version
   - yarn --version
   - yarn test
