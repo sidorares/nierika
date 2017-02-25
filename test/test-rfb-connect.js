@@ -5,7 +5,7 @@ describe('rfb client', () => {
     const rfb = require('rfb2')
     const r = rfb.createConnection({
       host: '127.0.0.1',
-      port: 5902,
+      port: 5911,
       password: 'my-new-password',
       encodings: [rfb.encodings.raw, rfb.encodings.pseudoCursor]
     });
