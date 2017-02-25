@@ -6,7 +6,7 @@ describe('rfb client', () => {
     const r = rfb.createConnection({
       host: '127.0.0.1',
       port: 5902,
-      password: 'vncpassword',
+      password: 'my-new-password',
       encodings: [rfb.encodings.raw, rfb.encodings.pseudoCursor]
     });
     r.on('connect', () => {
