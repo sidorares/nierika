@@ -1,0 +1,29 @@
+{
+  "name": "nierika",
+  "version": "1.0.0",
+  "description": "wip - nothing here yet",
+  "main": "vnc.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sidorares/nierika.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sidorares/nierika/issues"
+  },
+  "homepage": "https://github.com/sidorares/nierika#readme",
+  "dependencies": {
+    "mocha": "^3.2.0",
+    "opencv": "^6.0.0",
+    "rfb2": "^0.2.0",
+    "tesseract.js": "^1.0.10"
+  }
+}
