@@ -1,1 +1,1 @@
-const screen = require('../lib/screen.js')
+const createScreen = require('../lib/screen.js').createScreen;
