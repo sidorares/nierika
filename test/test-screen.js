@@ -1,5 +1,5 @@
 const rfb = require('rfb2');
-const createScreen = require('../lib/screen.js').createScreen;
+const createScreen = require('../').createScreen;
 const opts = {
   host: '127.0.0.1',
   port: 5911,
