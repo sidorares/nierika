@@ -2,9 +2,9 @@
   "name": "nierika",
   "version": "1.0.0",
   "description": "wip - nothing here yet",
-  "main": "./dist/screen.js",
+  "main": "./lib/screen.js",
   "directories": {
-    "test": "test"
+    "test": "mocha 'test/**/*.js' --timeout 100000",
   },
   "scripts": {
     "test": "mocha",
