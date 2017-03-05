@@ -4,7 +4,7 @@
   "description": "wip - nothing here yet",
   "main": "./lib/screen.js",
   "directories": {
-    "test": "mocha 'test/**/*.js' --timeout 100000"
+    "test": "mocha"
   },
   "scripts": {
     "test": "mocha",
