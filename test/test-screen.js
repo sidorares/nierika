@@ -10,12 +10,12 @@ const opts = {
 
 const screen = createScreen(opts)
 
-describe('screen.waitVisible', () => {
+describe('screen', () => {
   it('can find an image', async () => {
     const chromeIcon = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-icon.png');
     const match = await screen.waitVisible(chromeIcon);
-    console.log(match)
-  })
+    assert.ok(match.probability >= chromeIcon.similarity())
+  });
 
   it('can wait for multiple images', async () => {
     const chromeIcon = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-icon.png');
@@ -26,18 +26,27 @@ describe('screen.waitVisible', () => {
       screen.waitVisible(chromeIcon),
       screen.waitVisible(driveIcon)
     ]);
-    console.log(matches)
-  })
+    assert.ok(
+      matches[0].probability >= ffIcon.similarity() &&
+      matches[1].probability >= chromeIcon.similarity() &&
+      matches[2].probability >= driveIcon.similarity()
+    )
+  });
 
   it('can move and click mouse', async () => {
     const chromeIcon = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-icon.png');
     const match = await screen.waitVisible(chromeIcon);
-    console.log(match)
-    await screen.mouseMove(match.x + 60, match.y + 40);
+    await screen.mouseMove(match.x, match.y);
     await screen.mouseLeftDoubleClick();
-    const searchInput = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-web-store.png');
-    const match2 = await screen.waitVisible(searchInput);
-    await screen.mouseMove(match2.x + 60, match2.y + 40);
+    const addTab = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-add-tab.png');
+    const match2 = await screen.waitVisible(addTab);
+    await screen.mouseMove(match2.x, match2.y);
     await screen.mouseLeftClick();
+  });
+
+  it('can type', async () => {
+    await screen.keyboardTypeText('this is a test. I\'m typing a very very long message');
+    const textTemplate = await screen.createTemplateFromFile(__dirname + '/fixtures/this-is-long-message-text.png');
+    const match = await screen.waitVisible(textTemplate.similar(0.8));
   });
 })
