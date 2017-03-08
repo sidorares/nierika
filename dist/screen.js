@@ -1,9 +1,16 @@
 const rfb = require('rfb2');
 const cv = require('opencv');
 const util = require('util');
+const debounce = require('debounce');
 const keysym = require('keysym');
 const EventEmitter = require('events').EventEmitter;
 const Template = require('./template.js')
+
+const rgb = m => {
+  const r = new cv.Matrix();
+  r.merge(m.split().slice(0, 3));
+  return r;
+}
 
 function Screen(opts) {
   EventEmitter.call(this);
@@ -14,14 +21,26 @@ function Screen(opts) {
     x: 0, // TODO: pass initial position from opts? or is there a way to see it from rfb?
     y: 0,
   };
-  this._mouseMoveSpeed = 1600; // pix/sec
+  this._opts = opts; // TODO merge default opts into ots, remove lines below
+  this._mouseMoveSpeed = 1000; // pix/sec
   this._mouseClickSpeed = 300;
   this._mouseDoubleClickSpeed = 50;
-  this._keyboardTypeSpeed = 20;
+  this._keyboardTypeSpeed = 15;
+  this._minSize = 12;
+  this._minMatchInterval = 250;
   this._rfbConn.on('connect', () => {
     const r = this._rfbConn;
-    this._screenBuffer = new cv.Matrix(r.height, r.width, cv.Constants.CV_8UC4);
+    this._screenBuffer = new cv.Matrix(r.height, r.width, cv.Constants.CV_8UC3);
+    /*
+    this._pyramid = [];
+    const pyrImage = this._screenBuffer.clone()
+    while(Math.min(pyrImage.width() / 2, pyrImage.height() / 2) > this._minSize) {
+      pyrImage.pyrDown();
+      this._pyramid.push(pyrImage.clone);
+    }
+    */
     this.emit('connect')
+    console.log('CONNECTED  =====')
     r.requestUpdate(true, 0, 0, r.width, r.height);
     r.on('rect', this._handleRawUpdate.bind(this))
   })
@@ -30,11 +49,14 @@ function Screen(opts) {
 util.inherits(Screen, EventEmitter);
 
 Screen.prototype._handleRawUpdate = function(rect) {
+  console.log('GOT UPDATE', rect.width, rect.height)
+
+
   const r = this._rfbConn;
   r.requestUpdate(true, 0, 0, r.width, r.height);
   const update = new cv.Matrix(rect.height, rect.width, cv.Constants.CV_8UC4);
   update.put(rect.buffer)
-  update.copyTo(this._screenBuffer, rect.x, rect.y);
+  rgb(update).copyTo(this._screenBuffer, rect.x, rect.y);
   this.emit('screen-update', rect);
 }
 
@@ -47,6 +69,12 @@ Screen.prototype._connected = function() {return __async(function*(){
   })
 }.call(this))}
 
+Screen.prototype.sleep = function(ms) {return __async(function*(){
+  return new Promise((accept, reject) => {
+    setTimeout(accept, ms);
+  })
+}())}
+
 Screen.prototype.createTemplateFromFile = function(path) {return __async(function*(){
   return new Promise((accept, reject) => {
     const template = new cv.Matrix();
@@ -55,10 +83,13 @@ Screen.prototype.createTemplateFromFile = function(path) {return __async(functio
         return reject(err);
       }
       img.convertTo(template, cv.Constants.CV_8UC4);
-      accept(new Template({matrix: template}))
+      accept(new Template({
+        matrix: rgb(template),
+        pyramidMinSize: this._opts.minTemplateSize
+      }))
     })
   })
-}())}
+}.call(this))}
 
 function clamp(val, max) {
   if (val < 0) {
@@ -70,46 +101,58 @@ function clamp(val, max) {
   return val
 }
 
+let counter = 0;
+let rect_counter = 0;
+
 Screen.prototype.waitVisible = function(template, maxWait=0) {return __async(function*(){
   yield this._connected();
-  let counter = 0;
   return new Promise((accept, reject) => {
-    let timeout = null
+    let timeout = null;
+    let dirtyArea = null;
+
     const findMatch = (rect) => {
-      /*
-      if (!rect) {
-        return
+      dirtyArea = null
+
+      let region = this._screenBuffer
+      region.save(`screen-${counter}-full.png`)
+
+      if (rect) {
+        let left  = rect.x - template.width()
+        if (left < 0) {
+          left = 0
+        }
+        let right = rect.x + rect.width + template.width()
+        if (right > region.width()) {
+          right = region.width()
+        }
+        let top  = rect.y - template.height()
+        if (top < 0) {
+          top = 0
+        }
+        let bottom = rect.y + rect.height + template.height()
+        if (bottom > region.height()) {
+          bottom = region.height()
+        }
+        region = region.roi(left, top, right - left, bottom - top)
       }
-
-      const left  = clamp(rect.x - template.width(), this._screenBuffer.width())
-      const top   = clamp(rect.y - template.height(), this._screenBuffer.height())
-      console.log('roi(left, top, rect.width + 2*template.width(), rect.height + 2*template.height())', left, top, rect.width + 2*template.width(), rect.height + 2*template.height())
-      const roi = rect
-        ? this._screenBuffer.roi(left, top, rect.width + 2*template.width(), rect.height + 2*template.height())
-        : this._screenBuffer
-
-      */
 
       counter++;
 
-      const rgb = m => {
-        const r = new cv.Matrix();
-        r.merge(m.split().slice(0, 3));
-        return r;
-      }
+      region.save(`screen-${counter}-${rect_counter}.png`)
+      template._mat.save(`screen-${counter}-template.png`)
 
-      rgb(this._screenBuffer).save(`screen-${counter}.png`)
-
-      const res = rgb(this._screenBuffer).matchTemplateByMatrix(rgb(template._mat));
+      const origin = region.locateROI();
+      const res = region.matchTemplateByMatrix(template._mat);
       const m = res.templateMatches(template.similarity(), 1, 1)
-      if (m[0] && (m[0].probability >= template.similarity())) {
+      if (m[0]) {
+        console.log('Got match!', m, ' count:', counter)
         this.removeListener('screen-update', findMatch)
         if (timeout) {
           clearTimeout(timeout);
         }
         const match = m[0] ? {
-          x: m[0].x + template.width() / 2,  // TODO: use template offset
-          y: m[0].y + template.height() / 2, // TODO: use template offset
+          x: origin[2] + m[0].x + template.width() / 2,  // TODO: use template offset
+          y: origin[3] + m[0].y + template.height() / 2, // TODO: use template offset
           probability: m[0].probability
         } : m[0]
         accept(match)
@@ -122,8 +165,38 @@ Screen.prototype.waitVisible = function(template, maxWait=0) {return __async(fun
     if (maxWait > 0) {
       timeout = setTimeout(cancel, maxWait)
     }
-    findMatch();
-    this.on('screen-update', findMatch);
+    const debouncedFind = debounce(findMatch, this._minMatchInterval);
+    findMatch()
+    this.on('screen-update', (rect) => {
+      if (dirtyArea) {
+        if (rect.x < dirtyArea.x) {
+          dirtyArea.x = rect.x;
+        }
+        if (rect.y < dirtyArea.y) {
+          dirtyArea.y = rect.y;
+        }
+
+        let right = dirtyArea.x + dirtyArea.width;
+        let bottom = dirtyArea.y + dirtyArea.height;
+        let updateRight = rect.x + rect.width;
+        let updateBottom = rect.y + rect.height;
+
+        if (updateRight > right) {
+          dirtyArea.width = updateRight - dirtyArea.x
+        }
+        if (updateBottom > bottom) {
+          dirtyArea.height = updateBottom - dirtyArea.y
+        }
+      } else {
+        dirtyArea = {
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height
+        }
+      }
+      debouncedFind(dirtyArea)
+    });
   });
 }.call(this))}
 
