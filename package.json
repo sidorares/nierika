@@ -2,7 +2,7 @@
   "name": "nierika",
   "version": "1.0.0",
   "description": "wip - nothing here yet",
-  "main": "./dist/screen.js",
+  "main": "./dis/screen.js",
   "directories": {
     "test": "mocha"
   },
@@ -23,8 +23,8 @@
   "homepage": "https://github.com/sidorares/nierika#readme",
   "dependencies": {
     "async-to-gen": "^1.3.2",
-    "debounce": "^1.0.0",
     "keysym": "0.0.6",
+    "lodash.throttle": "^4.1.1",
     "mocha": "^3.2.0",
     "opencv": "^6.0.0",
     "rfb2": "^0.2.0",
