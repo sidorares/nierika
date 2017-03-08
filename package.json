@@ -2,7 +2,7 @@
   "name": "nierika",
   "version": "1.0.0",
   "description": "wip - nothing here yet",
-  "main": "./dis/screen.js",
+  "main": "./dist/screen.js",
   "directories": {
     "test": "mocha"
   },
