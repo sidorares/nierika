@@ -1,7 +1,7 @@
 const rfb = require('rfb2');
 const cv = require('opencv');
 const util = require('util');
-const debounce = require('debounce');
+const throttle = require('lodash.throttle');
 const keysym = require('keysym');
 const EventEmitter = require('events').EventEmitter;
 const Template = require('./template.js')
@@ -22,12 +22,12 @@ function Screen(opts) {
     y: 0,
   };
   this._opts = opts; // TODO merge default opts into ots, remove lines below
-  this._mouseMoveSpeed = 1000; // pix/sec
-  this._mouseClickSpeed = 300;
-  this._mouseDoubleClickSpeed = 50;
-  this._keyboardTypeSpeed = 15;
+  this._mouseMoveSpeed = 1400; // pix/sec
+  this._mouseClickSpeed = 200;
+  this._mouseDoubleClickSpeed = 100;
+  this._keyboardTypeSpeed = 10;
   this._minSize = 12;
-  this._minMatchInterval = 250;
+  this._minMatchInterval = 500;
   this._rfbConn.on('connect', () => {
     const r = this._rfbConn;
     this._screenBuffer = new cv.Matrix(r.height, r.width, cv.Constants.CV_8UC3);
@@ -49,9 +49,10 @@ function Screen(opts) {
 util.inherits(Screen, EventEmitter);
 
 Screen.prototype._handleRawUpdate = function(rect) {
-  console.log('GOT UPDATE', rect.width, rect.height)
-
-
+  console.log('GOT UPDATE', rect.width, rect.height);
+  if (rect.width === 0 || rect.height === 0) {
+    return;
+  }
   const r = this._rfbConn;
   r.requestUpdate(true, 0, 0, r.width, r.height);
   const update = new cv.Matrix(rect.height, rect.width, cv.Constants.CV_8UC4);
@@ -110,7 +111,10 @@ Screen.prototype.waitVisible = function(template, maxWait=0) {return __async(fun
     let timeout = null;
     let dirtyArea = null;
 
+    let handleScreenUpdate = null;
+
     const findMatch = (rect) => {
+      console.log('findMatch!', rect)
       dirtyArea = null
 
       let region = this._screenBuffer
@@ -146,7 +150,7 @@ Screen.prototype.waitVisible = function(template, maxWait=0) {return __async(fun
       const m = res.templateMatches(template.similarity(), 1, 1)
       if (m[0]) {
         console.log('Got match!', m, ' count:', counter)
-        this.removeListener('screen-update', findMatch)
+        this.removeListener('screen-update', handleScreenUpdate)
         if (timeout) {
           clearTimeout(timeout);
         }
@@ -159,15 +163,15 @@ Screen.prototype.waitVisible = function(template, maxWait=0) {return __async(fun
       }
     }
     const cancel = () => {
-      this.removeListener('screen-update', findMatch)
+      this.removeListener('screen-update', handleScreenUpdate)
       reject()
     }
     if (maxWait > 0) {
       timeout = setTimeout(cancel, maxWait)
     }
-    const debouncedFind = debounce(findMatch, this._minMatchInterval);
+    const throttledFind = throttle(findMatch, this._minMatchInterval);
     findMatch()
-    this.on('screen-update', (rect) => {
+    handleScreenUpdate = (rect) => {
       if (dirtyArea) {
         if (rect.x < dirtyArea.x) {
           dirtyArea.x = rect.x;
@@ -195,8 +199,9 @@ Screen.prototype.waitVisible = function(template, maxWait=0) {return __async(fun
           height: rect.height
         }
       }
-      debouncedFind(dirtyArea)
-    });
+      throttledFind(dirtyArea)
+    }
+    this.on('screen-update', handleScreenUpdate);
   });
 }.call(this))}
 
