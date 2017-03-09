@@ -1,6 +1,16 @@
-function Template(opts) {
+function Template (opts) {
+  this._opts = opts;
+  this._opts.minTemplateSize = 12; // TODO hack
   this._mat = opts.matrix;
   this._similarity = opts.similarity || 0.99;
+  this._matPyrDown = this._mat.clone()
+  let pyrLevel = 0;
+  this._pyrFactor = 1;
+  while(Math.min(this._matPyrDown.width() / 2, this._matPyrDown.width() / 2) > this._opts.minTemplateSize) {
+    pyrLevel++;
+    this._matPyrDown.pyrDown();
+    this._pyrFactor *= 2;
+  }
 }
 
 Template.prototype.similarity = function () {
