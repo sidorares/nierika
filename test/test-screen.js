@@ -35,18 +35,28 @@ describe('screen', () => {
 
   it('can move and click mouse', async () => {
     const chromeIcon = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-icon.png');
-    const match = await screen.waitVisible(chromeIcon);
-    await screen.mouseMove(match.x, match.y);
+    await screen.mouseMove(chromeIcon);
     await screen.mouseLeftDoubleClick();
     const addTab = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-add-tab.png');
-    const match2 = await screen.waitVisible(addTab);
-    await screen.mouseMove(match2.x, match2.y);
+    await screen.mouseMove(addTab);
     await screen.mouseLeftClick();
   });
 
   it('can type', async () => {
-    await screen.keyboardTypeText('this is a test. I\'m typing a very very long message');
-    const textTemplate = await screen.createTemplateFromFile(__dirname + '/fixtures/this-is-long-message-text.png');
-    const match = await screen.waitVisible(textTemplate.similar(0.8));
+    await screen.keyboardTypeText(`javascript:alert('test')`);
+    await screen.keyboardKeyPress('Return');
+    const alertDialog = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-dialog3.png');
+    const match = await screen.waitVisible(alertDialog.similar(0.9));
+    const alertOK = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-ok-button.png');
+    await screen.mouseMove(alertOK);
+    await screen.mouseLeftClick();
+    await screen.waitVanish(alertDialog.similar(0.99));
+    const closeTab = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-close-icon.png');
+    await screen.mouseMove(closeTab);
+    await screen.mouseLeftClick();
+    await screen.sleep(500);
+    await screen.mouseMove(400, 600);
+    await screen.mouseMove(closeTab);
+    await screen.mouseLeftClick();
   });
 })
