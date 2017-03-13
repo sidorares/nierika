@@ -49,7 +49,7 @@ describe('screen', () => {
     await screen.keyboardTypeText(`javascript:alert('test')`);
     await screen.keyboardKeyPress('Return');
     const alertDialog = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-dialog3.png');
-    const match = await screen.waitVisible(alertDialog.similar(0.999));
+    const match = await screen.waitVisible(alertDialog.similar(0.9));
     console.log('DIALOG VISIBLE')
     const alertOK = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-ok-button.png');
     await screen.mouseMove(alertOK);
