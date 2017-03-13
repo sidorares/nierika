@@ -47,7 +47,8 @@ describe('screen', () => {
     await screen.keyboardKeyPress('Return');
     const alertDialog = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-dialog3.png');
     const match = await screen.waitVisible(alertDialog.similar(0.999));
-    await screen.mouseMove(match.x + 160, match.y + 70);
+    const alertOK = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-ok-button.png');
+    await screen.mouseMove(alertOK);
     await screen.mouseLeftClick();
     await screen.waitVanish(alertDialog.similar(0.99));
     const closeTab = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-close-icon.png');
