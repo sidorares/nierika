@@ -40,9 +40,12 @@ describe('screen', () => {
     const addTab = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-add-tab.png');
     await screen.mouseMove(addTab);
     await screen.mouseLeftClick();
+    console.log('add tab clicked')
   });
 
   it('can type', async () => {
+    console.log('typing tets start')
+    await screen.sleep(1000);
     await screen.keyboardTypeText(`javascript:alert('test')`);
     await screen.keyboardKeyPress('Return');
     const alertDialog = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-dialog3.png');
