@@ -40,31 +40,23 @@ describe('screen', () => {
     const addTab = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-add-tab.png');
     await screen.mouseMove(addTab);
     await screen.mouseLeftClick();
-    console.log('add tab clicked')
   });
 
   it('can type', async () => {
-    console.log('typing tets start')
-    await screen.sleep(1000);
     await screen.keyboardTypeText(`javascript:alert('test')`);
     await screen.keyboardKeyPress('Return');
     const alertDialog = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-dialog3.png');
     const match = await screen.waitVisible(alertDialog.similar(0.9));
-    console.log('DIALOG VISIBLE')
     const alertOK = await screen.createTemplateFromFile(__dirname + '/fixtures/alert-ok-button.png');
     await screen.mouseMove(alertOK);
     await screen.mouseLeftClick();
-    console.log('click to ok ok')
     await screen.waitVanish(alertDialog.similar(0.99));
-    console.log('vait vanish ok')
     const closeTab = await screen.createTemplateFromFile(__dirname + '/fixtures/chrome-close-icon.png');
     await screen.mouseMove(closeTab);
     await screen.mouseLeftClick();
-    console.log('close tab 1 ok')
     await screen.sleep(500);
     await screen.mouseMove(400, 600);
     await screen.mouseMove(closeTab);
     await screen.mouseLeftClick();
-    console.log('close tab 2 ok')
   });
 })
