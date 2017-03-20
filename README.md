@@ -58,6 +58,7 @@ const screen = nierika.createScreen(opts)
 
 # TODO
 
+- OCR with tesseract.js
 - SikuliIDE-like test authoring app based on electron
 - tools to automatically extract and save templates and convert to test scripts from running [nightmare](https://github.com/segmentio/nightmare) or [cypress](https://www.cypress.io/)
 - option to match templates using ORB descriptors
