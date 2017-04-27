@@ -1,8 +1,11 @@
 {
   "name": "nierika",
-  "version": "1.0.0",
-  "description": "wip - nothing here yet",
+  "version": "1.1.0",
+  "description": "End-to end screen based testing",
   "main": "./dist/screen.js",
+  "files": [
+    "dist"
+  ],
   "directories": {
     "test": "mocha"
   },
