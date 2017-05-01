@@ -1,5 +1,7 @@
 # nierika
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/sidorares/nierika.svg)](https://greenkeeper.io/)
+
 Visual testing library, heavily inspired by [Sikuli](http://www.sikuli.org/) / [SikiliX](http://sikulix.com/)
 
 ![nierika](https://cloud.githubusercontent.com/assets/173025/24088486/0b0be20a-0d7f-11e7-8356-dacc4cada52b.gif)
