@@ -56,6 +56,13 @@ const screen = nierika.createScreen(opts)
 
 `template.width()`, `template.height()`
 
+## Using from docker container
+
+1) (optional, unless you already have vnc server somewhere): start `docker run --name vnc -p 5911:5901 -p 6901:6901 -e "VNC_PW=my-new-password" consol/centos-xfce-vnc`
+2) modify tests to use host: "vnc", port: 5901, password: "my-new-password" credentials
+3) git pull sidorares/nierika:1.1
+4) `docker run -it --link vnc:vnc -v [path-to-your-tests-folder]:/test sidorares/nierika:1.1`
+
 # TODO
 
 - OCR with tesseract.js
