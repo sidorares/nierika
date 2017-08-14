@@ -8,4 +8,4 @@ RUN apt-get install --force-yes --yes libcv-dev libcvaux-dev libhighgui-dev libo
 RUN mkdir node_modules
 RUN npm install mocha nierika rfb2
 
-CMD /node_modules/.bin mocha /test
+CMD /node_modules/.bin/mocha /test
