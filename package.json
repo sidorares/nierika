@@ -28,7 +28,7 @@
     "async-to-gen": "^1.3.2",
     "keysym": "0.0.6",
     "lodash.throttle": "^4.1.1",
-    "mocha": "^5.0.2",
+    "mocha": "^5.1.0",
     "opencv": "^6.0.0",
     "rfb2": "^0.2.0",
     "tesseract.js": "^1.0.10"
