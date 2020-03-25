@@ -31,6 +31,6 @@
     "mocha": "^5.0.2",
     "opencv": "^6.0.0",
     "rfb2": "^0.2.0",
-    "tesseract.js": "^1.0.10"
+    "tesseract.js": "^2.1.1"
   }
 }
