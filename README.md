@@ -76,6 +76,10 @@ const screen = nierika.createScreen(opts)
 - save and replay tests together with screen recording
 - automatically create tests from VNC session recording
 
+# Similar projects
+
+- https://github.com/sibson/vncdotool
+
 # Thanks
 
 __[@glenngillen](https://github.com/glenngillen)__ for running ['New Year resolution to finish a project' meetup](https://www.meetup.com/side-project-sprints/events/237119467/) where I finnally put pieces of code together as first version of this lib
